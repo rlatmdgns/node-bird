@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) =>{
-  const Image = sequelize.define({
+  const Image = sequelize.define('Image',{
     src:{
       type: DataTypes.STRING(200),
       allowNull:false,
@@ -9,6 +9,8 @@ module.exports = (sequelize, DataTypes) =>{
     collate: 'utf8mb4_general_ci',
   });
   
-  Image.associate = (db) => {};
+  Image.associate = (db) => {
+    db.Image.belongsTo(db.Post);
+  };
   return Image;
 }
