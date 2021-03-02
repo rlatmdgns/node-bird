@@ -8,7 +8,45 @@ import {
   SIGN_UP_SUCCESS, SIGN_UP_REQUEST, SIGN_UP_FAILURE,
   FOLLOW_REQUEST, FOLLOW_FAILURE, FOLLOW_SUCCESS,
   UNFOLLOW_FAILURE, UNFOLLOW_REQUEST, UNFOLLOW_SUCCESS,
+  LOAD_MY_INFO_FAILURE, LOAD_MY_INFO_SUCCESS, LOAD_MY_INFO_REQUEST,
 } from '../reducers/user';
+
+function loadUserAPI() {
+  return axios.get('/user');
+}
+function* loadUser(action) {
+  try {
+    const result = yield call(loadUserAPI, action.data);
+    yield put({
+      type: LOAD_MY_INFO_SUCCESS,
+      data: result.data,
+    });
+  } catch (err) {
+    yield put({
+      type: LOAD_MY_INFO_FAILURE,
+      error: err.response.data,
+    });
+  }
+}
+
+function unfollowAPI() {
+  return axios.get('/user');
+}
+function* unfollow(action) {
+  try {
+    // const result = yield call(unfollowAPI, action.data)
+    yield delay(1000);
+    yield put({
+      type: UNFOLLOW_SUCCESS,
+      data: action.data,
+    });
+  } catch (err) {
+    yield put({
+      type: UNFOLLOW_FAILURE,
+      error: err.response.data,
+    });
+  }
+}
 
 function followAPI(data) {
   return axios.post('/api/followAPI', data);
@@ -24,24 +62,6 @@ function* follow(action) {
   } catch (err) {
     yield put({
       type: FOLLOW_FAILURE,
-      error: err.response.data,
-    });
-  }
-}
-function unfollowAPI(data) {
-  return axios.post('/api/unfollowAPI', data);
-}
-function* unfollow(action) {
-  try {
-    // const result = yield call(unfollowAPI, action.data)
-    yield delay(1000);
-    yield put({
-      type: UNFOLLOW_SUCCESS,
-      data: action.data,
-    });
-  } catch (err) {
-    yield put({
-      type: UNFOLLOW_FAILURE,
       error: err.response.data,
     });
   }
@@ -102,6 +122,9 @@ function* signUp(action) {
     });
   }
 }
+function* watchLoadUser() {
+  yield takeLatest(LOAD_MY_INFO_REQUEST, loadUser);
+}
 
 function* watchFollow() {
   yield takeLatest(FOLLOW_REQUEST, follow);
@@ -125,6 +148,7 @@ function* watchSignUp() {
 
 export default function* userSaga() {
   yield all([
+    fork(watchLoadUser),
     fork(watchFollow),
     fork(watchUnfollow),
     fork(watchLogIn),

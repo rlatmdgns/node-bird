@@ -1,6 +1,4 @@
-import shortId from 'shortid';
 import produce from 'immer';
-import faker from 'faker';
 
 export const initialState = {
   mainPosts: [],
@@ -19,25 +17,6 @@ export const initialState = {
   addCommentDone: false,
   addCommentError: null,
 };
-
-export const generateDummyPost = (number) => Array(number).fill().map(() => ({
-  id: shortId.generate(),
-  User: {
-    id: shortId.generate(),
-    nickname: faker.name.findName(),
-  },
-  content: faker.lorem.paragraph(),
-  Images: [{
-    src: faker.image.image(),
-  }],
-  Comments: [{
-    User: {
-      id: shortId.generate(),
-      nickname: faker.name.findName(),
-    },
-    content: faker.lorem.sentence(),
-  }],
-}));
 
 // initialState.mainPosts = initialState.mainPosts.concat(generateDummyPost(10));
 
@@ -67,25 +46,6 @@ export const addComment = (data) => ({
   data,
 });
 
-const dummyPost = (data) => ({
-  id: data.id,
-  content: data.content,
-  User: {
-    id: 1,
-    nickname: '김승훈',
-  },
-  Images: [],
-  Comments: [],
-});
-
-const dummyComment = (data) => ({
-  id: shortId.generate(),
-  content: data,
-  User: {
-    id: 1,
-    nickname: '김승훈',
-  },
-});
 // 이전 상태를 액션을 통해 다음상태로 만들어내는 함수(불변성을 지키면서)
 const reducer = (state = initialState, action) => produce(state, (draft) => {
   switch (action.type) {
@@ -112,7 +72,7 @@ const reducer = (state = initialState, action) => produce(state, (draft) => {
     case ADD_POST_SUCCESS:
       draft.addPostLoading = false;
       draft.addPostDone = true;
-      draft.mainPosts.unshift(dummyPost(action.data));
+      draft.mainPosts.unshift(action.data);
       break;
     case ADD_POST_FAILURE:
       draft.addPostLoading = false;
@@ -138,8 +98,8 @@ const reducer = (state = initialState, action) => produce(state, (draft) => {
       draft.addCommentError = null;
       break;
     case ADD_COMMENT_SUCCESS: {
-      const post = draft.mainPosts.find((v) => v.id === action.data.postId);
-      post.Comments.unshift(dummyComment(action.data.content));
+      const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+      post.Comments.unshift(action.data);
       draft.addCommentLoading = false;
       draft.addCommentDone = true;
       break;

@@ -50,9 +50,10 @@ const PostCard = ({ post }) => {
                       <Button>수정</Button>
                       <Button type="danger" loading={removePostLoading} onClick={onRemovePost}>삭제</Button>
                     </>
-                  ) : <Button>신고</Button> }
+                  )
+                  : <Button>신고</Button>}
               </Button.Group>
-        )}
+            )}
           >
             <EllipsisOutlined />
           </Popover>,
@@ -95,7 +96,7 @@ PostCard.propTypes = {
     id: PropTypes.number,
     User: PropTypes.object,
     content: PropTypes.string,
-    createdAt: PropTypes.object,
+    createdAt: PropTypes.string,
     Comments: PropTypes.arrayOf(PropTypes.object),
     Images: PropTypes.arrayOf(PropTypes.object),
   }).isRequired,
