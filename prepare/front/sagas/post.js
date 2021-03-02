@@ -32,15 +32,11 @@ function* loadPosts(action) {
 
 // addPost
 function addPostAPI(data) {
-  return axios.post('/api/post', data);
+  return axios.post('/post', data);
 }
 function* addPost(action) {
   try {
-    // yield put({
-    //   type: ADD_POST_REQUEST,
-    //   data: action.data,
-    // });
-    yield delay(1000);
+    const result = yield call(addPostAPI, action.data);
     const id = shortId.generate();
     yield put({
       type: ADD_POST_SUCCESS,

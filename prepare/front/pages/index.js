@@ -7,6 +7,7 @@ import { LOAD_POSTS_REQUEST } from '../reducers/post';
 
 const Home = () => {
   const { me } = useSelector((state) => state.user);
+  console.log(me, 'me');
   const { mainPosts, hasMorePosts, loadPostsLoading } = useSelector((state) => state.post);
   const dispatch = useDispatch();
 
