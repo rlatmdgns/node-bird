@@ -4,6 +4,12 @@ export const initialState = {
   mainPosts: [],
   imagePaths: [],
   hasMorePosts: true,
+  likePostLoading: false,
+  likePostDone: false,
+  likePostError: null,
+  unlikePostLoading: false,
+  unlikePostDone: false,
+  unlikePostError: null,
   loadPostsLoading: false,
   loadPostsDone: false,
   loadPostsError: null,
@@ -16,9 +22,24 @@ export const initialState = {
   addCommentLoading: false,
   addCommentDone: false,
   addCommentError: null,
+  uploadImagesLoading: false,
+  uploadImagesDone: false,
+  uploadImagesError: null,
 };
 
 // initialState.mainPosts = initialState.mainPosts.concat(generateDummyPost(10));
+
+export const UPLOAD_IMAGES_REQUEST = 'UPLOAD_IMAGES_REQUEST';
+export const UPLOAD_IMAGES_SUCCESS = 'UPLOAD_IMAGES_SUCCESS';
+export const UPLOAD_IMAGES_FAILURE = 'UPLOAD_IMAGES_FAILURE';
+
+export const LIKE_POST_REQUEST = 'LIKE_POST_REQUEST';
+export const LIKE_POST_SUCCESS = 'LIKE_POST_SUCCESS';
+export const LIKE_POST_FAILURE = 'LIKE_POST_FAILURE';
+
+export const UNLIKE_POST_REQUEST = 'UNLIKE_POST_REQUEST';
+export const UNLIKE_POST_SUCCESS = 'UNLIKE_POST_SUCCESS';
+export const UNLIKE_POST_FAILURE = 'UNLIKE_POST_FAILURE';
 
 export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
 export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
@@ -49,6 +70,49 @@ export const addComment = (data) => ({
 // 이전 상태를 액션을 통해 다음상태로 만들어내는 함수(불변성을 지키면서)
 const reducer = (state = initialState, action) => produce(state, (draft) => {
   switch (action.type) {
+    case UPLOAD_IMAGES_REQUEST:
+      draft.uploadImagesLoading = true;
+      draft.uploadImagesDone = false;
+      draft.uploadImagesError = null;
+      break;
+    case UPLOAD_IMAGES_SUCCESS: {
+      draft.imagePaths = action.data;
+      draft.uploadImagesLoading = false;
+      draft.uploadImagesDone = true;
+      break;
+    }
+    case UPLOAD_IMAGES_FAILURE:
+      draft.uploadImagesLoading = false;
+      draft.uploadImagesError = action.error;
+      break;
+    case LIKE_POST_REQUEST:
+      draft.likePostLoading = true;
+      draft.likePostDone = false;
+      draft.likePostError = null;
+      break;
+    case LIKE_POST_SUCCESS: {
+      const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+      post.Likers.push({ id: action.data.UserId });
+      draft.likePostLoading = false;
+      draft.likePostDone = true;
+      break;
+    }
+    case LIKE_POST_FAILURE:
+      draft.likePostLoading = false;
+      draft.likePostError = action.error;
+      break;
+    case UNLIKE_POST_REQUEST:
+      draft.unlikePostLoading = true;
+      draft.unlikePostDone = false;
+      draft.unlikePostError = null;
+      break;
+    case UNLIKE_POST_SUCCESS: {
+      const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+      post.Likers = post.Likers.filter((v) => v.id !== action.data.UserId);
+      draft.unlikePostLoading = false;
+      draft.unlikePostDone = true;
+      break;
+    }
     case LOAD_POSTS_REQUEST:
       draft.loadPostsLoading = true;
       draft.loadPostsDone = false;
