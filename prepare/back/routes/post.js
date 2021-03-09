@@ -8,13 +8,40 @@ const { isLoggedIn } = require('./middlewares');
 
 const router = express.Router();
 
-router.post('/', isLoggedIn, async(req, res, next) => {
+const  upload = multer({
+  storage: multer.diskStorage({
+    destination(req, file, done){
+      done(null, 'uploads');
+    },
+    filename(req, file, done){
+      const ext = path.extname(file.originalname); // 확장자 추출 .png
+      const basename = path.basename(file.originalname, ext)
+      done(null, basename + '_' + new Date().getTime() + ext);
+    },
+  }),
+  limits : {fileSize: 20 * 1024 * 1024},
+});
+router.post('/images', isLoggedIn, upload.array('image'), (req, res, next) => {
+  console.log(req.files);
+  res.json(req.files.map((v)=> v.filename))
+})
+
+
+router.post('/', isLoggedIn, upload.none(), async(req, res, next) => {
   try{
     const post = await Post.create({
       content: req.body.content,
       UserId: req.user.id,
     });
-
+    if(req.body.image){
+      if(Array.isArray(req.body.image)){  //이미지를 여러개 올린경우 배열로 올라감 [.png , .png]
+        const images = await Promise.all(req.body.image.map((image) =>  Image.create({src : image})));
+        await post.addImages(images);
+      }else{ // 하나만 올린경우
+        const images = await Image.create({src : req.body.image});
+        await post.addImages(images);
+      }
+    }
     const fullPost = await Post.findOne({
       where: { id: post.id },
       include: [{
@@ -41,23 +68,6 @@ router.post('/', isLoggedIn, async(req, res, next) => {
   }
 })
 
-const  upload = multer({
-  storage: multer.diskStorage({
-    destination(req, file, done){
-      done(null, 'uploads');
-    },
-    filename(req, file, done){
-      const ext = path.extname(file.originalname); // 확장자 추출 .png
-      const basename = path.basename(file.originalname, ext)
-      done(null, basename + new Date().getTime() + ext);
-    },
-  }),
-  limits : {fileSize: 20 * 1024 * 1024},
-});
-router.post('/images', isLoggedIn, upload.array('image'), (req, res, next) => {
-  console.log(req.files);
-  res.json(req.files.map((v)=> v.filename))
-})
 
 router.post('/:postId/comment', isLoggedIn, async (req, res, next) => { // POST /post/1/comment
   try {
